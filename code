@@ -1,0 +1,66 @@
+import sys
+
+import pyttsx3
+import speech_recognition as sr
+import pywhatkit
+import wikipedia
+import datetime
+import pyjokes
+import chitchat_dataset as ccc
+
+listener = sr.Recognizer()
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)
+
+
+def talk(text):
+    engine.say(text)
+    engine.runAndWait()
+
+
+def take_command():
+    listener = sr.Recognizer()
+    try:
+        with sr.Microphone() as source:
+            print('Listening...')
+            voice = listener.listen(source)
+
+            command = listener.recognize_google(voice)
+
+            command = command.lower()
+
+            if 'alexa' in command:
+                command = command.replace('alexa', '')
+                print(command)
+    except:
+        sys.exit()
+    return command
+
+
+def run_alexa():
+    commands = take_command()
+    if 'play' in commands:
+        song = commands.replace('play', '')
+        print('playing' + song)
+        pywhatkit.playonyt(song)
+    elif 'time' in commands:
+        time = datetime.datetime.now().strftime('%I:%M %p')
+        print(time)
+        talk('Current time is ' + time)
+    elif 'who is' in commands:
+        person = commands.replace('who is', '')
+        info = wikipedia.summary(person, 1)
+        print(info)
+        talk(info)
+    elif 'joke' in commands:
+        talk(pyjokes.get_joke())
+    elif 'search' in commands:
+        find = commands.replace('search','')
+        pywhatkit.search(find)
+    else:
+        talk('Did not understand')
+
+
+while True:
+    run_alexa()
